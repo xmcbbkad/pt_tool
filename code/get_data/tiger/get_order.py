@@ -50,7 +50,7 @@ def get_latest_order():
     tz = pytz.timezone('America/New_York')
     run_date = datetime.datetime.now(tz).strftime('%Y-%m-%d')
     end_ts = int(time.time())*1000
-    start_ts = end_ts -86400*3*1000
+    start_ts = end_ts -86400*5*1000
     orders = openapi_client.get_orders(limit=300, start_time=start_ts, end_time=end_ts)
 
     df = pd.DataFrame(columns=["contract", "trade_timestamp", "trade_time", "action", "filled", "avg_fill_price"])
@@ -73,6 +73,9 @@ def save_order(output_dir = "/root/program_trading/data/tiger_trade_log/"):
     this_df = get_latest_order()
     #print(this_df)
     #print(this_df.info())
+    if this_df.empty:
+        return
+    
     this_df['trade_month'] = this_df['trade_time'].dt.strftime('%Y-%m')
     
     groupd = this_df.groupby("trade_month")
@@ -88,6 +91,7 @@ def save_order(output_dir = "/root/program_trading/data/tiger_trade_log/"):
             combined_data = group_data
         
         combined_data.drop('trade_month', axis=1, inplace=True)
+        combined_data = combined_data.sort_values(by='trade_timestamp')
         combined_data.drop_duplicates(subset=["trade_timestamp"], keep='first', inplace=True)
         print("333 len(duplicated combinmed)={}".format(len(combined_data)))
         combined_data.to_csv(output_file, index=False)
