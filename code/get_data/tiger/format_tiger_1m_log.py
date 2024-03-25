@@ -14,12 +14,16 @@ def get_dir_result(code, input_dir, output_dir):
     for f in file_list:
         file_path = os.path.join(input_dir, f)
         df = pd.read_csv(file_path)
-        if not df.empty:    
+        if not combined_df.empty and not df.empty:    
             combined_df = pd.concat([combined_df, df], ignore_index=True)        
+        elif not df.empty:
+            combined_df = df.copy()
+
 
     unique_combined_df = combined_df.drop_duplicates()
-    
-    unique_combined_df['time_str'] = pd.to_datetime(unique_combined_df['time_str'])
+   
+ 
+    unique_combined_df['time_str'] = pd.to_datetime(unique_combined_df['time_str'], format='%Y-%m-%d %H:%M:%S')
     print(unique_combined_df.info())
 
     unique_combined_df['DateOnly'] = unique_combined_df['time_str'].dt.date
@@ -27,12 +31,10 @@ def get_dir_result(code, input_dir, output_dir):
     
     grouped = unique_combined_df.groupby("DateOnly")
     #grouped = unique_combined_df.groupby("time_str")
-    print(code)
     for period, group_data in grouped:
         month = group_data['time_str'].dt.strftime('%Y-%m').iloc[0]
         #group_data['DateOnly'] = pd.to_datetime(group_data['time_str'])
         #month = group_data['DateOnly'].dt.strftime('%Y-%m').iloc[0]
-        #print(month) 
         group_data.drop('DateOnly', axis=1, inplace=True)
 
         new_output_dir = "{}{}".format(output_dir, month)
@@ -54,6 +56,7 @@ def run_all(code_list=[], month_list=[], input_dir="/root/program_trading/data/t
     
     for code in code_list:
         for month in month_list:
+            print("{}--{}".format(code, month))
             input_dir = "/root/program_trading/data/tiger_1m_log/{}/{}/".format(code, month)
             output_dir = "/root/program_trading/data/tiger_1m_log_after/{}/".format(code)
             get_dir_result(code, input_dir, output_dir) 
@@ -61,11 +64,11 @@ def run_all(code_list=[], month_list=[], input_dir="/root/program_trading/data/t
 
 
 if __name__ == "__main__":
-   #code = sys.argv[1]
-   #month = sys.argv[2]
-   #input_dir = "/root/program_trading/data/tiger_1m_log/{}/{}/".format(code, month)
-   #output_dir = "/root/program_trading/data/tiger_1m_log_after/{}/".format(code)
-   #
-   #get_dir_result(code, input_dir, output_dir)
-    run_all()
+    code = sys.argv[1]
+    month = sys.argv[2]
+    input_dir = "/root/program_trading/data/tiger_1m_log/{}/{}/".format(code, month)
+    output_dir = "/root/program_trading/data/tiger_1m_log_after/{}/".format(code)
+    
+    get_dir_result(code, input_dir, output_dir)
+    #run_all()
      
