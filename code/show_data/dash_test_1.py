@@ -4,30 +4,29 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
 import pandas as pd
 
+import feature
+
 # 创建一个 Dash 应用程序实例
 app = dash.Dash(__name__)
 
 date_input = dcc.Input(
     id='date-input',
     type='text',
-    placeholder='请输入日期，格式如：2023-12-23',
-    style={'width': '300px'}
+    placeholder='请输入日期, 格式如: 2023-12-23',
+    style={'width': '100px'}
 )
 code_input = dcc.Input(
     id='code-input',
     type='text',
-    placeholder='请输入code, 比如TSLA',
-    style={'width': '300px'}
+    placeholder='请输入stock code, 比如: TSLA',
+    style={'width': '100px'}
 )
 
 def load_stock_data(code, date):
     #data = pd.read_csv('/root/program_trading/code/plotly/apple_demo.csv')
-    data = pd.read_csv('/root/program_trading/data/tiger_1m_log_after/{}/2024-03/{}.csv'.format(code, date))
-    window=20
-    data['RollingMean'] = data['close'].rolling(window=window).mean()
-    data['RollingStd'] = data['close'].rolling(window=window).std()
-    data['UpperBand'] = data['RollingMean'] + 2 * data['RollingStd']
-    data['LowerBand'] = data['RollingMean'] - 2 * data['RollingStd']
+    data = pd.read_csv('/root/program_trading/data/tiger_1m_log_after/{}/{}/{}.csv'.format(code, date[:7], date))
+    data = feature.FeatureBuilder().add_boll(data)
+
     return data
 
 def create_k_line_chart(data):
@@ -40,14 +39,14 @@ def create_k_line_chart(data):
                                               decreasing_line_color='green')])
 
 
-    k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['RollingMean'], mode='lines', name='boll_mean'))
-    k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['UpperBand'], mode='lines', name='boll_upper'))
-    k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['LowerBand'], mode='lines', name='boll_lower'))
+    k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['boll_mean'], mode='lines', name='boll_mean'))
+    k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['boll_upper'], mode='lines', name='boll_upper'))
+    k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['boll_lower'], mode='lines', name='boll_lower'))
     
     
     k_line_chart.update_layout(
-        height=800, 
-        width=1500,
+        height=1200, 
+        width=1800,
         xaxis=dict(
             dtick=5 * 60 * 1000,  # 每 5 分钟一个刻度
         )
@@ -63,7 +62,7 @@ app.layout = html.Div(children=[
         code_input,
         date_input,
         html.Button('加载数据', id='load-button', n_clicks=0)
-    ], style={'margin-bottom': '20px'}),
+    ], style={'margin-bottom': '1px'}),
 
     # 添加 Dash Core 组件
     dcc.Graph(
