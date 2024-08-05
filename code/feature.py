@@ -14,6 +14,26 @@ class FeatureBuilder():
         
         return df
 
+    def add_continue_down(self, df):
+        df["continue_10_down"] = False
+        for i in range(len(df)):
+            span = 10
+            if i-span <= 0:
+                continue
+            
+            continue_fall = True
+            for j in range(i-1, i-span, -1):
+                if df.iloc[j]["close"] > df.iloc[j+1]["close"]:
+                    continue
+                else:
+                    continue_fall = False
+                    break
+            if continue_fall:
+                df.loc[i, "continue_10_down"] = True 
+        
+        return df
+
+
     def add_fluctuation(self, df):
         df["fluctuation"] = "" 
         last_index = 0

@@ -26,7 +26,7 @@ def load_stock_data(code, date):
     #data = pd.read_csv('/root/program_trading/code/plotly/apple_demo.csv')
     data = pd.read_csv('/root/program_trading/data/tiger_1m_log_after/{}/{}/{}.csv'.format(code, date[:7], date))
     data = feature.FeatureBuilder().add_boll(data)
-    data = feature.FeatureBuilder().add_fluctuation(data)
+    #data = feature.FeatureBuilder().add_fluctuation(data)
     #print(data)
     return data
 
@@ -45,37 +45,37 @@ def create_k_line_chart(data):
     k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['boll_lower'], mode='lines', name='boll_lower'))
     #k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['fluctuation'], mode='markers', name='fluctuation'))
    
-    left_buy_signals = data[data['fluctuation'] == 'left_buy']
-    right_sell_signals = data[data['fluctuation'] == 'right_sell']
-    
-    if not left_buy_signals.empty:
-        k_line_chart.add_trace(go.Scatter(x=left_buy_signals['time_str'],
-                                          y=left_buy_signals['low'],
-                                          mode='markers',
-                                          marker=dict(color='blue', symbol='triangle-up', size=15),
-                                          name='Left Buy Signal'))
-    if not right_sell_signals.empty:
-        k_line_chart.add_trace(go.Scatter(x=right_sell_signals['time_str'],
-                                          y=right_sell_signals['high'],
-                                          mode='markers',
-                                          marker=dict(color='black', symbol='triangle-down', size=15),
-                                          name='Right Sell Signal'))
+    #left_buy_signals = data[data['fluctuation'] == 'left_buy']
+    #right_sell_signals = data[data['fluctuation'] == 'right_sell']
+    #
+    #if not left_buy_signals.empty:
+    #    k_line_chart.add_trace(go.Scatter(x=left_buy_signals['time_str'],
+    #                                      y=left_buy_signals['low'],
+    #                                      mode='markers',
+    #                                      marker=dict(color='blue', symbol='triangle-up', size=15),
+    #                                      name='Left Buy Signal'))
+    #if not right_sell_signals.empty:
+    #    k_line_chart.add_trace(go.Scatter(x=right_sell_signals['time_str'],
+    #                                      y=right_sell_signals['high'],
+    #                                      mode='markers',
+    #                                      marker=dict(color='black', symbol='triangle-down', size=15),
+    #                                      name='Right Sell Signal'))
 
-    left_sell_signals = data[data['fluctuation'] == 'left_sell']
-    right_buy_signals = data[data['fluctuation'] == 'right_buy']
-    
-    if not left_sell_signals.empty:
-        k_line_chart.add_trace(go.Scatter(x=left_sell_signals['time_str'],
-                                          y=left_sell_signals['high'],
-                                          mode='markers',
-                                          marker=dict(color='blue', symbol='triangle-down', size=15),
-                                          name='Left Sell Signal'))
-    if not right_buy_signals.empty:
-        k_line_chart.add_trace(go.Scatter(x=right_buy_signals['time_str'],
-                                          y=right_buy_signals['low'],
-                                          mode='markers',
-                                          marker=dict(color='black', symbol='triangle-up', size=15),
-                                          name='Right Buy Signal'))
+    #left_sell_signals = data[data['fluctuation'] == 'left_sell']
+    #right_buy_signals = data[data['fluctuation'] == 'right_buy']
+    #
+    #if not left_sell_signals.empty:
+    #    k_line_chart.add_trace(go.Scatter(x=left_sell_signals['time_str'],
+    #                                      y=left_sell_signals['high'],
+    #                                      mode='markers',
+    #                                      marker=dict(color='blue', symbol='triangle-down', size=15),
+    #                                      name='Left Sell Signal'))
+    #if not right_buy_signals.empty:
+    #    k_line_chart.add_trace(go.Scatter(x=right_buy_signals['time_str'],
+    #                                      y=right_buy_signals['low'],
+    #                                      mode='markers',
+    #                                      marker=dict(color='black', symbol='triangle-up', size=15),
+    #                                      name='Right Buy Signal'))
 
 
     

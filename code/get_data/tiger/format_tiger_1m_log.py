@@ -64,11 +64,11 @@ def run_all(code_list=[], month_list=[], input_dir="/root/program_trading/data/t
 
 
 if __name__ == "__main__":
-    code = sys.argv[1]
-    month = sys.argv[2]
-    input_dir = "/root/program_trading/data/tiger_1m_log/{}/{}/".format(code, month)
-    output_dir = "/root/program_trading/data/tiger_1m_log_after/{}/".format(code)
-    
-    get_dir_result(code, input_dir, output_dir)
-    #run_all()
+    #code = sys.argv[1]
+    #month = sys.argv[2]
+    #input_dir = "/root/program_trading/data/tiger_1m_log/{}/{}/".format(code, month)
+    #output_dir = "/root/program_trading/data/tiger_1m_log_after/{}/".format(code)
+    #
+    #get_dir_result(code, input_dir, output_dir)
+    run_all()
      
