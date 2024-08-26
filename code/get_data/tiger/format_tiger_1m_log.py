@@ -23,21 +23,28 @@ def get_dir_result(code, input_dir, output_dir):
     unique_combined_df = combined_df.drop_duplicates()
    
  
-    unique_combined_df['time_str'] = pd.to_datetime(unique_combined_df['time_str'], format='%Y-%m-%d %H:%M:%S')
+    unique_combined_df['date'] = pd.to_datetime(unique_combined_df['time_str'], format='%Y-%m-%d %H:%M:%S')
     print(unique_combined_df.info())
 
-    unique_combined_df['DateOnly'] = unique_combined_df['time_str'].dt.date
+    unique_combined_df['DateOnly'] = unique_combined_df['date'].dt.date
 
     
     grouped = unique_combined_df.groupby("DateOnly")
     #grouped = unique_combined_df.groupby("time_str")
     for period, group_data in grouped:
-        month = group_data['time_str'].dt.strftime('%Y-%m').iloc[0]
+        month = group_data['date'].dt.strftime('%Y-%m').iloc[0]
         #group_data['DateOnly'] = pd.to_datetime(group_data['time_str'])
         #month = group_data['DateOnly'].dt.strftime('%Y-%m').iloc[0]
         group_data.drop('DateOnly', axis=1, inplace=True)
+        group_data.drop('time', axis=1, inplace=True)
+        group_data.drop('time_str', axis=1, inplace=True)
+        group_data.drop('symbol', axis=1, inplace=True)
 
-        new_output_dir = "{}{}".format(output_dir, month)
+        cols = ['date'] + [col for col in group_data if col != 'date']
+        group_data = group_data[cols]
+
+        #new_output_dir = "{}{}".format(output_dir, month)
+        new_output_dir = os.path.join(output_dir, month[:4], month)
         if not os.path.exists(new_output_dir):
             os.makedirs(new_output_dir)
 
@@ -70,5 +77,6 @@ if __name__ == "__main__":
     #output_dir = "/root/program_trading/data/tiger_1m_log_after/{}/".format(code)
     #
     #get_dir_result(code, input_dir, output_dir)
+    #run_all(code_list=["AAPL"])
     run_all()
      
