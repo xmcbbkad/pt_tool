@@ -2,15 +2,16 @@ import pandas as pd
 import os
 
 # 读取CSV文件
-symbol = "AAPL"
-symbol = "AMD"
-symbol = "AMZN"
-symbol = "GOOG"
-symbol = "MSFT"
-symbol = "NVDA"
+#symbol = "AAPL"
+#symbol = "AMD"
+#symbol = "AMZN"
+#symbol = "GOOG"
+#symbol = "MSFT"
+#symbol = "NVDA"
 symbol = "TSLA"
 base_dir = "/root/program_trading/data/taobao/"
 df = pd.read_csv('{}/{}.csv'.format(base_dir, symbol))
+df = df.iloc[::-1]
 
 
 # 将日期列转换为datetime格式
