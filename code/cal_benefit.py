@@ -14,24 +14,28 @@ with open(file_path, mode='r', encoding='utf-8') as file:
     # 遍历CSV文件中的每一行
     for row in reader:
         print(row)
-        date = row[4].split()[0]
+        date = row[0].split()[0]
         if date not in all_result:
             all_result[date] = {
-                "long_position" : 0,
-                "long_position_price" : 0,
-                "short_position" : 0,
-                "short_position_price" : 0,
+                "buy_count" : 0,
+                "sell_count": 0,
+                "buy_filled" : 0,
+                "sell_filled" : 0,
+                "buy_amount" : 0,
+                "sell_amount" : 0,
                 "net" : 0
             }
             
-        if row[0] == "BUY":
-            all_result[date]["long_position"] += int(row[3])
-            all_result[date]["long_position_price"] += float(row[1])*int(row[3])
-        elif row[0] == "SELL":
-            all_result[date]["short_position"] += int(row[3])
-            all_result[date]["short_position_price"] += float(row[1])*int(row[3])
+        if row[2] == "BUY":
+            all_result[date]["buy_filled"] += int(row[3])
+            all_result[date]["buy_amount"] += int(row[3])*float(row[4])
+            all_result[date]["buy_count"] += 1
+        elif row[2] == "SELL":
+            all_result[date]["sell_filled"] += int(row[3])
+            all_result[date]["sell_amount"] += int(row[3])*float(row[4])
+            all_result[date]["sell_count"] += 1
         
-        all_result[date]["net"] = all_result[date]["short_position_price"] - all_result[date]["long_position_price"]
+        all_result[date]["net"] = all_result[date]["sell_amount"] - all_result[date]["buy_amount"]
 
     
     net = 0
@@ -39,4 +43,4 @@ with open(file_path, mode='r', encoding='utf-8') as file:
         print(item)
         print(all_result[item])
         net += all_result[item]["net"]
-    print(net)
+    print("cumulative net:{}".format(net))
