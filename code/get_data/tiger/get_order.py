@@ -93,6 +93,7 @@ def save_order(output_dir = "/root/program_trading/data/tiger_trade_log/"):
         combined_data = combined_data.sort_values(by='trade_date')
         combined_data.drop_duplicates(subset=["trade_date"], keep='first', inplace=True)
         print("333 len(duplicated combinmed)={}".format(len(combined_data)))
+        combined_data = combined_data.reindex(columns=["trade_date", "contract", "action", "filled", "avg_fill_price"])
         combined_data.to_csv(output_file, index=False)
 
 
