@@ -4,13 +4,12 @@ import pandas as pd
 class FeatureBuilder():
     def __init__(self, ):
         pass
-    
-    def add_boll(self, df):
-        window = 20
-        df['boll_mean'] = df['close'].rolling(window=window).mean()
-        df['boll_std'] = df['close'].rolling(window=window).std()
-        df['boll_upper'] = df['boll_mean'] + 2 * df['boll_std']
-        df['boll_lower'] = df['boll_mean'] - 2 * df['boll_std']
+   
+    def add_boll(self, df, window=20):
+        df['boll_mean'] = df['close'].rolling(window=window, min_periods=1).mean().round(2)
+        boll_std = df['close'].rolling(window=window, min_periods=1).std().round(2)
+        df['boll_upper'] = df['boll_mean'] + 2 * boll_std
+        df['boll_lower'] = df['boll_mean'] - 2 * boll_std
         
         return df
 
@@ -98,13 +97,35 @@ class FeatureBuilder():
             TR3_percent = abs(df.iloc[i]["low"] - df.iloc[i-1]["close"])/min(df.iloc[i]["low"], df.iloc[i-1]["close"])
             df.loc[i, "TR_percent"] = max([TR1_percent, TR2_percent, TR3_percent])
 
-
+        df["TR"] = df["TR"].round(2)
+        df["TR_percent"] = df["TR_percent"]*100
+        df["TR_percent"] = df["TR_percent"].round(2)
         return df
+
+    def add_rsi(self, df, window=6):
+        delta = data['close'].diff()
+
+        gain = delta.where(delta > 0, 0)
+        loss = -delta.where(delta < 0, 0)
+
+        avg_gain = gain.rolling(window=window, min_periods=1).mean()
+        avg_loss = loss.rolling(window=window, min_periods=1).mean()
+        avg_loss = avg_loss.replace(0, 1e-10)
+
+        rs = avg_gain / avg_loss
+        rsi = 100 - (100 / (1 + rs))
+        
+        df['RSI_{}'.format(window)] = rsi.round(2)
+        return df 
 
 if __name__ == "__main__":
     code = "TSLA"
-    date = "2024-03-21"
+    date = "2024-08-21"
     data = pd.read_csv('/root/program_trading/data/tiger_1m_log_after/{}/{}/{}/{}.csv'.format(code, date[:4], date[:7], date))
+    data = FeatureBuilder().add_boll(data)
     data = FeatureBuilder().add_fluctuation(data)
     data = FeatureBuilder().add_true_range(data)
-    print(data)
+    data = FeatureBuilder().add_rsi(data, window=6)
+    data = FeatureBuilder().add_rsi(data, window=12)
+    data = FeatureBuilder().add_rsi(data, window=24)
+    print(data[:50])
