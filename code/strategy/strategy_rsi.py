@@ -5,25 +5,33 @@ import random
 from utils.cal_metrics import TradeStaticsWithYearMonth
 
 """
-name: buy above boll average
-      sell below boll average
+buy when rsi_6, rsi_12, rsi_24 all at day high
+sell when rsi_6, rsi_12, rsi_24 all at day low
 """
 
-def random_buy_above_average(df):
+def buy_rsi_6_12_24_all_high(df):
     output = []
+    max_rsi_6 = 50
+    max_rsi_12 = 50
+    max_rsi_24 = 50    
+
     buy_price = -1.0
     sell_price = -1.0
-    buy_time = ""
-    sell_time = ""
+
     for i in range(len(df)):
-        if i <= 15:
+        if i < 15:
             continue
-        #if buy_price < 0 and random.random()<=0.1  and df.iloc[i]["close"] > df.iloc[i]["boll_mean"]:
-        if len(df)-i > 15 and buy_price < 0 and df.iloc[i]["close"] > df.iloc[i]["boll_mean"]:
-        #if buy_price < 0 and df.iloc[i]["low"] < df.iloc[0]["open"] and df.iloc[i]["close"] > df.iloc[i]["boll_mean"] and df.iloc[i]["close"]*1.005 < df.iloc[i]["boll_upper"]:
-            buy_price = df.iloc[i]["close"]
+        if i < 30:        
+            max_rsi_6 = max(max_rsi_6, df.iloc[i]["RSI_6"])        
+            max_rsi_12 = max(max_rsi_12, df.iloc[i]["RSI_12"])        
+            max_rsi_24 = max(max_rsi_24, df.iloc[i]["RSI_24"])        
             continue
 
+
+        if len(df)-i > 15 and buy_price < 0 and df.iloc[i]["RSI_6"] > max_rsi_6 and df.iloc[i]["RSI_12"] > max_rsi_12 and df.iloc[i]["RSI_24"] > max_rsi_24:
+            buy_price = df.iloc[i]["close"]
+            continue 
+        
         if buy_price > 0 and sell_price < 0:
             if df.iloc[i]["low"] <= buy_price*0.995:
                 sell_price = buy_price*0.995
@@ -36,26 +44,35 @@ def random_buy_above_average(df):
             output.append({"direction":"long", "buy":buy_price, "sell":sell_price})
             buy_price = -1.0
             sell_price = -1.0
+        
+        max_rsi_6 = max(max_rsi_6, df.iloc[i]["RSI_6"])        
+        max_rsi_12 = max(max_rsi_12, df.iloc[i]["RSI_12"])        
+        max_rsi_24 = max(max_rsi_24, df.iloc[i]["RSI_24"])        
     return output
-    #return output[:1]
 
-def random_sell_below_average(df):
+
+def sell_rsi_6_12_24_all_low(df):
     output = []
-    sell_price = -1.0
-    buy_price = -1.0
-    buy_time = ""
-    sell_time = ""
-    for i in range(len(df)):
-        #if sell_price < 0 and random.random()<0.1 and df.iloc[i]["close"] < df.iloc[i]["boll_mean"]:
-        #if sell_price < 0 and df.iloc[i]["high"] > df.iloc[0]["open"] and df.iloc[i]["close"] < df.iloc[i]["boll_mean"] and df.iloc[i]["close"]*0.995 > df.iloc[i]["boll_lower"]:
-        #    sell_price = df.iloc[i]["close"]
-        #    continue
-        if i <=15:
-            continue
-        if len(df)-i > 15 and sell_price < 0 and df.iloc[i]["close"] < df.iloc[i]["boll_mean"]:
-            sell_price = df.iloc[i]["close"]
-            continue
+    min_rsi_6 = 50
+    min_rsi_12 = 50
+    min_rsi_24 = 50   
 
+    buy_price = -1.0
+    sell_price = -1.0
+
+    for i in range(len(df)):
+        if i <15 :
+            continue
+        if i < 30:       
+            min_rsi_6 = min(min_rsi_6, df.iloc[i]["RSI_6"])        
+            min_rsi_12 = min(min_rsi_12, df.iloc[i]["RSI_12"])        
+            min_rsi_24 = min(min_rsi_24, df.iloc[i]["RSI_24"])        
+            continue
+ 
+        if len(df)-i > 15 and sell_price < 0 and df.iloc[i]["RSI_6"] < min_rsi_6 and df.iloc[i]["RSI_12"] < min_rsi_12 and df.iloc[i]["RSI_24"] < min_rsi_24:
+            sell_price = df.iloc[i]["close"]
+            continue 
+        
         if sell_price > 0 and buy_price < 0:
             if df.iloc[i]["high"] >= sell_price*1.005:
                 buy_price = sell_price*1.005
@@ -69,72 +86,12 @@ def random_sell_below_average(df):
             
             buy_price = -1.0
             sell_price = -1.0
+ 
+        min_rsi_6 = min(min_rsi_6, df.iloc[i]["RSI_6"])        
+        min_rsi_12 = min(min_rsi_12, df.iloc[i]["RSI_12"])        
+        min_rsi_24 = min(min_rsi_24, df.iloc[i]["RSI_24"])        
     
     return output
-
-def random_buy_below_average(df):
-    output = []
-    buy_price = -1.0
-    sell_price = -1.0
-    buy_time = ""
-    sell_time = ""
-    for i in range(len(df)):
-        if i <=15:
-            continue
-        if len(df)-i > 15 and buy_price < 0 and df.iloc[i]["close"] < df.iloc[i]["boll_mean"]:
-        #if buy_price < 0 and df.iloc[i]["low"] < df.iloc[0]["open"] and df.iloc[i]["close"] > df.iloc[i]["boll_mean"] and df.iloc[i]["close"]*1.005 < df.iloc[i]["boll_upper"]:
-            buy_price = df.iloc[i]["close"]
-            continue
-
-        if buy_price > 0 and sell_price < 0:
-            if df.iloc[i]["low"] <= buy_price*0.995:
-                sell_price = buy_price*0.995
-            elif df.iloc[i]["high"] >= buy_price*1.005:
-                sell_price = buy_price*1.005
-            #elif i == len(df) - 1:
-            #    sell_price = df.iloc[i]["low"]
-             
-        if buy_price > 0 and sell_price > 0:
-            output.append({"direction":"long", "buy":buy_price, "sell":sell_price})
-            buy_price = -1.0
-            sell_price = -1.0
-    
-    return output
-
-def random_sell_above_average(df):
-    output = []
-    sell_price = -1.0
-    buy_price = -1.0
-    buy_time = ""
-    sell_time = ""
-    for i in range(len(df)):
-        #if sell_price < 0 and random.random()<0.1 and df.iloc[i]["close"] < df.iloc[i]["boll_mean"]:
-        #if sell_price < 0 and df.iloc[i]["high"] > df.iloc[0]["open"] and df.iloc[i]["close"] < df.iloc[i]["boll_mean"] and df.iloc[i]["close"]*0.995 > df.iloc[i]["boll_lower"]:
-        #    sell_price = df.iloc[i]["close"]
-        #    continue
-        if i <=15:
-            continue
-        #if sell_price < 0  and random.random()<=0.1 and df.iloc[i]["close"] > df.iloc[i]["boll_mean"]:
-        if len(df)-i > 15 and sell_price < 0 and df.iloc[i]["close"] > df.iloc[i]["boll_mean"]:
-            sell_price = df.iloc[i]["close"]
-            continue
-
-        if sell_price > 0 and buy_price < 0:
-            if df.iloc[i]["high"] >= sell_price*1.005:
-                buy_price = sell_price*1.005
-            elif df.iloc[i]["low"] <= sell_price*0.995:
-                buy_price = sell_price*0.995
-            #elif i == len(df) - 1:
-            #    buy_price = df.iloc[i]["high"]
-             
-        if sell_price > 0 and buy_price > 0:
-            output.append({"direction":"short", "sell":sell_price, "buy":buy_price})
-            
-            buy_price = -1.0
-            sell_price = -1.0
-   
-    return output
-    #return output[:1]
 
 def run_all(input_dir):
     sorted_files = []
@@ -148,11 +105,12 @@ def run_all(input_dir):
     for file in sorted_files:
         if file.endswith(".csv"):
             data = pd.read_csv(file)
-            data = feature.FeatureBuilder().add_boll(data) 
-            #output = random_buy_above_average(data)  
-            #output = random_sell_below_average(data)  
-            #output = random_buy_below_average(data)  
-            output = random_sell_above_average(data)  
+            #data = feature.FeatureBuilder().add_boll(data) 
+            data = feature.FeatureBuilder().add_rsi(data, window=6) 
+            data = feature.FeatureBuilder().add_rsi(data, window=12) 
+            data = feature.FeatureBuilder().add_rsi(data, window=24) 
+            #output = buy_rsi_6_12_24_all_high(data)  
+            output = sell_rsi_6_12_24_all_low(data)  
             print(file)
             date = file.split("/")[-1][:10]
             print(output)
@@ -164,6 +122,7 @@ def run_all(input_dir):
 if __name__ == "__main__":
     #run_all("/root/program_trading/data/tiger_1m_log_after/TSLA/2024-07")
     #run_all("/root/program_trading/data/taobao/AAPL/2022/2022-01")
+    #run_all("/root/program_trading/data/taobao/TSLA/2022/")
     #run_all("/root/program_trading/data/taobao/AAPL/2022/")
     #run_all("/root/program_trading/data/tiger_1m_log_after/AAPL/2022/")
     #exit(0)

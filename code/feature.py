@@ -103,7 +103,7 @@ class FeatureBuilder():
         return df
 
     def add_rsi(self, df, window=6):
-        delta = data['close'].diff()
+        delta = df['close'].diff()
 
         gain = delta.where(delta > 0, 0)
         loss = -delta.where(delta < 0, 0)

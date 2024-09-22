@@ -9,8 +9,8 @@ def cal_benefit(file_path):
         # 创建一个csv reader对象
         reader = csv.reader(file)
     
-        all_result = {}
-    
+        result_with_date = {}
+        all_result = TradeStatisticsOption_1() 
         
         # 遍历CSV文件中的每一行
         for row in reader:
@@ -21,25 +21,28 @@ def cal_benefit(file_path):
                 continue
 
             date = row[0].split()[0]
-            if date not in all_result:
-                all_result[date] = TradeStatisticsOption_1()
+            if date not in result_with_date:
+                result_with_date[date] = TradeStatisticsOption_1()
             
-            all_result[date].add_transaction(contract=row[1], action=row[2], filled=row[3], price=row[4])
+            result_with_date[date].add_transaction(contract=row[1], action=row[2], filled=row[3], price=row[4])
+            all_result.add_transaction(contract=row[1], action=row[2], filled=row[3], price=row[4])
  
     
         
-        all_statistic = TradeStatisticsOption_1()
-        for item in all_result:
+        #all_statistic = TradeStatisticsOption_1()
+        for item in result_with_date:
             print(item)
-            all_result[item].cal_metrics()
-            all_result[item].print()
-            all_statistic.add_item(all_result[item])
+            result_with_date[item].cal_metrics()
+            result_with_date[item].print()
+            #all_statistic.add_item(result_with_date[item])
 
         print("all:")
-        all_statistic.print()    
+        #all_statistic.print()    
+        all_result.cal_metrics()
+        all_result.print()    
 
 if __name__ == "__main__":
     file_path = '/root/program_trading/data/tiger_trade_log/2024-09.csv'
     #file_path = '/root/program_trading/data/tiger_trade_log/2024-09-10.csv'
-    #file_path = '/root/program_trading/data/tiger_trade_log/2024-09-11.csv'
+    #file_path = '/root/program_trading/data/tiger_trade_log/2024-09_16-20.csv'
     cal_benefit(file_path)
