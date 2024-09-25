@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger('TigerOpenApi')
 
 
-def get_client_config(config_file = "/root/program_trading/code/pt_tool/code/get_data/tiger/tiger_api_config.json"):
+def get_client_config(config_file = "/root/program_trading/code/pt_tool/get_data/tiger/tiger_api_config.json"):
     """
     https://www.itiger.com/openapi/info 开发者信息获取
     :return:
