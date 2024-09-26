@@ -1,0 +1,5 @@
+#*/1 * * * * cd /root/program_trading/code && /root/anaconda3/bin/python get_tiger_api.py >> ../data/tiger_log/crontab.log 2>&1
+#*/1 * * * * cd /root/program_trading/code && /root/anaconda3/bin/python get_xueqiu_api_realtime.py >> ../data/xueqiu_realtime_log/crontab.log 2>&1
+#*/1 * * * * cd /root/program_trading/code && /root/anaconda3/bin/python get_xueqiu_api_1m.py >> ../data/xueqiu_1m_log/crontab.log 2>&1
+0 7 * * * cd /root/program_trading/code/pt_tool/get_data/tiger && /root/anaconda3/bin/python get_tiger_api_1m.py >> /root/program_trading/data/tiger_1m_log/crontab.log 2>&1
+0 8 * * * cd /root/program_trading/code/pt_tool/get_data/tiger && /root/anaconda3/bin/python get_order.py >> /root/program_trading/data/tiger_trade_log/crontab.log 2>&1
