@@ -91,6 +91,8 @@ class TradeStatisticsOption_1():
             if self.unfinished_transactions[i].get("status", "") == "used":
                 continue         
     
+            if self.unfinished_transactions[i]["contract"] != this_transaction["contract"]:
+                continue
             if self.unfinished_transactions[i]["action"] == this_transaction["action"]:
                 break
 
