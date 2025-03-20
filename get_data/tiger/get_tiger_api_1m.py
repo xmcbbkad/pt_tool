@@ -63,18 +63,8 @@ def get_1m_data(code):
     bars.to_csv("{}/{}.csv".format(directory, run_date), index=0)
 
 if __name__ == '__main__':
-    get_1m_data(".IXIC")
-    time.sleep(10)
-    get_1m_data("TSLA")
-    time.sleep(10)
-    get_1m_data("AAPL")
-    time.sleep(10)
-    get_1m_data("AMD")
-    time.sleep(10)
-    get_1m_data("NVDA")
-    time.sleep(10)
-    get_1m_data("MSFT")
-    time.sleep(10)
-    get_1m_data("GOOG")
-    time.sleep(10)
-    get_1m_data("AMZN")
+    stock_list = [".IXIC", "TSLA", "AAPL", "AMD", "NVDA", "MSFT", "GOOG", "AMZN", "META", "BRK.A", "TSM", "ORCL", "NFLX", "ASML", "BABA", "PDD", "FUTU"] 
+
+    for i in range(len(stock_list)):
+        get_1m_data(stock_list[i])
+        time.sleep(10)

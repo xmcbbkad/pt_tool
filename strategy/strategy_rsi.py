@@ -9,7 +9,7 @@ buy when rsi_6, rsi_12, rsi_24 all at day high
 sell when rsi_6, rsi_12, rsi_24 all at day low
 """
 
-def buy_rsi_6_12_24_all_high(df):
+def buy_rsi_6_12_24_all_high(df, output_strategy="percent_0.5"):
     output = []
     max_rsi_6 = 50
     max_rsi_12 = 50
@@ -32,14 +32,19 @@ def buy_rsi_6_12_24_all_high(df):
             buy_price = df.iloc[i]["close"]
             continue 
         
-        if buy_price > 0 and sell_price < 0:
-            if df.iloc[i]["low"] <= buy_price*0.995:
-                sell_price = buy_price*0.995
-            elif df.iloc[i]["high"] >= buy_price*1.005:
-                sell_price = buy_price*1.005
-            #elif i == len(df) - 1:
-            #    sell_price = df.iloc[i]["low"]
-             
+        if output_strategy=="percent_0.5":
+            if buy_price > 0 and sell_price < 0:
+                if df.iloc[i]["low"] <= buy_price*0.995:
+                    sell_price = buy_price*0.995
+                elif df.iloc[i]["high"] >= buy_price*1.005:
+                    sell_price = buy_price*1.005
+                #elif i == len(df) - 1:
+                #    sell_price = df.iloc[i]["low"]
+        elif output_strategy=="boll_mean":
+            if buy_price > 0 and sell_price < 0:
+                if df.iloc[i]["low"] <= df.iloc[i]["boll_mean"]:
+                    sell_price = df.iloc[i]["boll_mean"]
+               
         if buy_price > 0 and sell_price > 0:
             output.append({"direction":"long", "buy":buy_price, "sell":sell_price})
             buy_price = -1.0
@@ -51,7 +56,7 @@ def buy_rsi_6_12_24_all_high(df):
     return output
 
 
-def sell_rsi_6_12_24_all_low(df):
+def sell_rsi_6_12_24_all_low(df, output_strategy="percent_0.5"):
     output = []
     min_rsi_6 = 50
     min_rsi_12 = 50
@@ -73,13 +78,18 @@ def sell_rsi_6_12_24_all_low(df):
             sell_price = df.iloc[i]["close"]
             continue 
         
-        if sell_price > 0 and buy_price < 0:
-            if df.iloc[i]["high"] >= sell_price*1.005:
-                buy_price = sell_price*1.005
-            elif df.iloc[i]["low"] <= sell_price*0.995:
-                buy_price = sell_price*0.995
-            #elif i == len(df) - 1:
-            #    buy_price = df.iloc[i]["high"]
+        if output_strategy=="percent_0.5": 
+            if sell_price > 0 and buy_price < 0:
+                if df.iloc[i]["high"] >= sell_price*1.005:
+                    buy_price = sell_price*1.005
+                elif df.iloc[i]["low"] <= sell_price*0.995:
+                    buy_price = sell_price*0.995
+                #elif i == len(df) - 1:
+                #    buy_price = df.iloc[i]["high"]
+        elif output_strategy=="boll_mean":
+            if buy_price > 0 and sell_price < 0:
+                if df.iloc[i]["high"] >= df.iloc[i]["boll_mean"]:
+                    buy_price = df.iloc[i]["boll_mean"]
              
         if sell_price > 0 and buy_price > 0:
             output.append({"direction":"short", "sell":sell_price, "buy":buy_price})
@@ -105,12 +115,12 @@ def run_all(input_dir):
     for file in sorted_files:
         if file.endswith(".csv"):
             data = pd.read_csv(file)
-            #data = feature.FeatureBuilder().add_boll(data) 
+            data = feature.FeatureBuilder().add_boll(data) 
             data = feature.FeatureBuilder().add_rsi(data, window=6) 
             data = feature.FeatureBuilder().add_rsi(data, window=12) 
             data = feature.FeatureBuilder().add_rsi(data, window=24) 
-            #output = buy_rsi_6_12_24_all_high(data)  
-            output = sell_rsi_6_12_24_all_low(data)  
+            output = buy_rsi_6_12_24_all_high(data, output_strategy="boll_mean")  
+            #output = sell_rsi_6_12_24_all_low(data, output_strategy="boll_mean")  
             print(file)
             date = file.split("/")[-1][:10]
             print(output)
@@ -122,10 +132,10 @@ def run_all(input_dir):
 if __name__ == "__main__":
     #run_all("/root/program_trading/data/tiger_1m_log_after/TSLA/2024-07")
     #run_all("/root/program_trading/data/taobao/AAPL/2022/2022-01")
-    #run_all("/root/program_trading/data/taobao/TSLA/2022/")
+    run_all("/root/program_trading/data/tiger_1m_log_after/TSLA/2023/")
     #run_all("/root/program_trading/data/taobao/AAPL/2022/")
     #run_all("/root/program_trading/data/tiger_1m_log_after/AAPL/2022/")
-    #exit(0)
+    exit(0)
     #run_all("/root/program_trading/data/tiger_1m_log_after/TSLA")
     
     base_data_dir_1 = "/root/program_trading/data/taobao/"

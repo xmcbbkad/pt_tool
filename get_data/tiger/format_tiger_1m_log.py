@@ -57,7 +57,7 @@ def run_all(code_list=[], month_list=[], input_dir="/root/program_trading/data/t
         code_list = [f for f in os.listdir(input_dir) if os.path.isdir(os.path.join(input_dir, f))] 
         print(code_list)
     if not month_list:
-        code_dir = os.path.join(input_dir, code_list[0])
+        code_dir = os.path.join(input_dir, "TSLA")
         month_list = [f for f in os.listdir(code_dir) if os.path.isdir(os.path.join(code_dir, f))] 
         print(month_list)
     
@@ -78,5 +78,6 @@ if __name__ == "__main__":
     #
     #get_dir_result(code, input_dir, output_dir)
     #run_all(code_list=["AAPL"])
-    run_all()
+    month_list=["2025-03"]
+    run_all(month_list=month_list)
      

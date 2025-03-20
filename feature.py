@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 class FeatureBuilder():
     def __init__(self, ):
@@ -118,9 +118,103 @@ class FeatureBuilder():
         df['RSI_{}'.format(window)] = rsi.round(2)
         return df 
 
+
+    def is_bearish_trend(self, df, 
+                        window=15,
+                        min_decline=0.03,      # 最低3%跌幅
+                        bearish_ratio=0.7,     # 70%阴线比例
+                        max_volatility=0.005,  # 平均波动率不超过0.5%
+                        trend_strength=0.8     # 趋势强度阈值
+                        ):
+        """
+        判断当前是否处于单边下跌行情
+        参数：
+        ohlc_df : DataFrame
+            包含OHLC数据的DataFrame，需按时间升序排列
+        window : int
+            分析的时间窗口（单位：K线数量）
+        min_decline : float
+            窗口期内要求的最小跌幅（百分比）
+        bearish_ratio : float
+            阴线的最小比例
+        max_volatility : float
+            允许的最大平均波动率（收盘价标准差/当前价格）
+        trend_strength : float
+            趋势强度阈值（价格与线性回归的相关系数）
+        """
+
+        df["is_bearish_trend"] = False
+        for i in range(len(df)):
+            ohlc_df = df[i-window:i]
+    
+            if len(ohlc_df) < window:
+                continue
+                #return False  # 数据不足时返回False
+            
+            recent = ohlc_df.iloc[-window:]
+            closes = recent['close'].values
+            
+            # 基础价格判断
+            price_change = (closes[0] - closes[-1]) / closes[0]
+            if price_change < min_decline:
+                continue
+                #return False
+            
+            # 阴线比例计算
+            bearish_count = sum(recent['close'] < recent['open'])
+            if bearish_count / window < bearish_ratio:
+                continue
+                #return False
+            
+            # 趋势强度分析（线性回归）
+            x = np.arange(window)
+            y = closes
+            
+            # 计算回归参数
+            slope, intercept = np.polyfit(x, y, 1)
+            predicted = intercept + slope * x
+            actual_mean = np.mean(y)
+            ss_total = np.sum((y - actual_mean)**2)
+            ss_reg = np.sum((predicted - actual_mean)**2)
+            r_squared = ss_reg / ss_total if ss_total != 0 else 0
+            
+            # 趋势方向和质量判断
+            if slope >= 0 or r_squared < trend_strength:
+                continue
+                #return False
+            
+            ## 波动性检查（收盘价标准差）
+            #price_std = np.std(closes) / closes[-1]
+            #if price_std > max_volatility:
+            #    continue
+            #    #return False
+            
+            # 创新低检查（至少80%的K线创周期内新低）
+            lows = recent['low'].values
+            new_lows = 0
+            current_min = lows[0]
+            for low in lows:
+                if low < current_min:
+                    new_lows += 1
+                    current_min = low
+            if new_lows / window < 0.5:  # 至少50%的K线创新低
+                continue
+                #return False
+            
+            # 反弹幅度限制（最大反弹不超过平均跌幅的2倍）
+            avg_body = np.mean(np.abs(recent['close'] - recent['open']))
+            max_rebound = np.max(recent['high'] - recent['close'].shift(1))
+            if max_rebound > 2 * avg_body:
+                continue
+                #return False
+            
+            ohlc_df.loc[i, "is_bearish_trend"] = True 
+        
+        return df        
+
 if __name__ == "__main__":
     code = "TSLA"
-    date = "2024-08-21"
+    date = "2025-02-25"
     data = pd.read_csv('/root/program_trading/data/tiger_1m_log_after/{}/{}/{}/{}.csv'.format(code, date[:4], date[:7], date))
     data = FeatureBuilder().add_boll(data)
     data = FeatureBuilder().add_fluctuation(data)
@@ -128,4 +222,5 @@ if __name__ == "__main__":
     data = FeatureBuilder().add_rsi(data, window=6)
     data = FeatureBuilder().add_rsi(data, window=12)
     data = FeatureBuilder().add_rsi(data, window=24)
-    print(data[:50])
+    data = FeatureBuilder().is_bearish_trend(data)
+    print(data[30:80])

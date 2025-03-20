@@ -24,14 +24,14 @@ code_input = dcc.Input(
 
 def load_stock_data(code, date):
     #data = pd.read_csv('/root/program_trading/code/plotly/apple_demo.csv')
-    data = pd.read_csv('/root/program_trading/data/tiger_1m_log_after/{}/{}/{}.csv'.format(code, date[:7], date))
+    data = pd.read_csv('/root/program_trading/data/tiger_1m_log_after/{}/{}/{}/{}.csv'.format(code, date[:4], date[:7], date))
     data = feature.FeatureBuilder().add_boll(data)
     #data = feature.FeatureBuilder().add_fluctuation(data)
     #print(data)
     return data
 
 def create_k_line_chart(data):
-    k_line_chart = go.Figure(data=[go.Candlestick(x=data['time_str'],
+    k_line_chart = go.Figure(data=[go.Candlestick(x=data['date'],
                                               open=data['open'],
                                               high=data['high'],
                                               low=data['low'],
@@ -40,9 +40,9 @@ def create_k_line_chart(data):
                                               decreasing_line_color='green')])
 
 
-    k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['boll_mean'], mode='lines', name='boll_mean'))
-    k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['boll_upper'], mode='lines', name='boll_upper'))
-    k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['boll_lower'], mode='lines', name='boll_lower'))
+    k_line_chart.add_trace(go.Scatter(x=data['date'], y=data['boll_mean'], mode='lines', name='boll_mean'))
+    k_line_chart.add_trace(go.Scatter(x=data['date'], y=data['boll_upper'], mode='lines', name='boll_upper'))
+    k_line_chart.add_trace(go.Scatter(x=data['date'], y=data['boll_lower'], mode='lines', name='boll_lower'))
     #k_line_chart.add_trace(go.Scatter(x=data['time_str'], y=data['fluctuation'], mode='markers', name='fluctuation'))
    
     #left_buy_signals = data[data['fluctuation'] == 'left_buy']
@@ -116,6 +116,7 @@ def update_k_line_chart(n_clicks, code, date):
     if n_clicks > 0 and date:
         data = load_stock_data(code, date)
         print(code, date)
+        print(data)
         k_line_chart = create_k_line_chart(data)
         return k_line_chart
     else:
